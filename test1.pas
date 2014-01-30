@@ -3,7 +3,7 @@ program test1;
 {$IFNDEF FPC}{$APPTYPE CONSOLE}{$ENDIF}
 
 uses
-  Allegro5;
+  Allegro5, main;
 
 const
   DISPLAY_WIDTH  = 800;

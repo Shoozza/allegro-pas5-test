@@ -38,6 +38,8 @@ end;
 procedure run;
 begin
   WriteLn('run');
+  al_clear_to_color(al_map_rgb(0, 0, 0));
+  al_flip_display();
   al_rest(2);
 end;
 

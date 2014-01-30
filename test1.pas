@@ -15,6 +15,7 @@ var
 procedure init;
 begin
   WriteLn('init');
+
   if not al_init then
   begin
     WriteLn('init error');
@@ -32,12 +33,14 @@ end;
 procedure cleanup;
 begin
   WriteLn('cleanup');
+
   al_destroy_display(Display);
 end;
 
 procedure run;
 begin
   WriteLn('run');
+
   al_clear_to_color(al_map_rgb(0, 0, 0));
   al_flip_display();
   al_rest(2);

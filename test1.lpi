@@ -48,6 +48,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
       <Libraries Value="lib"/>
+      <OtherUnitFiles Value="lib/allegro-pas5/lib"/>
       <UnitOutputDirectory Value="obj/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Other>

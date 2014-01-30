@@ -32,7 +32,7 @@ end;
 procedure cleanup;
 begin
   WriteLn('cleanup');
-  al_destroy_bitmap(Display);
+  al_destroy_display(Display);
 end;
 
 procedure run;

@@ -28,6 +28,8 @@ begin
     WriteLn('create display error');
     halt(1);
   end;
+
+  al_set_window_title(Display, 'allegro-pas5 test1');
 end;
 
 procedure cleanup;

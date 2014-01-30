@@ -1,0 +1,3 @@
+[submodule "lib/allegro-pas5"]
+	path = lib/allegro-pas5
+	url = git://github.com/Soldat/allegro-pas5.git

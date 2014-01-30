@@ -5,6 +5,13 @@ program test1;
 uses
   Allegro5;
 
+const
+  DISPLAY_WIDTH  = 800;
+  DISPLAY_HEIGHT = 600;
+
+var
+  Display: ALLEGRO_DISPLAYptr;
+
 procedure init;
 begin
   WriteLn('init');
@@ -13,16 +20,25 @@ begin
     WriteLn('init error');
     halt(1);
   end;
+
+  Display := al_create_display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+  if Display = nil then
+  begin
+    WriteLn('create display error');
+    halt(1);
+  end;
 end;
 
 procedure cleanup;
 begin
   WriteLn('cleanup');
+  al_destroy_bitmap(Display);
 end;
 
 procedure run;
 begin
   WriteLn('run');
+  al_rest(2);
 end;
 
 begin

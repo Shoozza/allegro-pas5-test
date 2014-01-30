@@ -2,9 +2,17 @@ program test1;
 
 {$IFNDEF FPC}{$APPTYPE CONSOLE}{$ENDIF}
 
+uses
+  Allegro5;
+
 procedure init;
 begin
   WriteLn('init');
+  if al_init then
+  begin
+    Write('init error');
+    halt(1);
+  end;
 end;
 
 procedure cleanup;

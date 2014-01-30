@@ -8,9 +8,9 @@ uses
 procedure init;
 begin
   WriteLn('init');
-  if al_init then
+  if not al_init then
   begin
-    Write('init error');
+    WriteLn('init error');
     halt(1);
   end;
 end;

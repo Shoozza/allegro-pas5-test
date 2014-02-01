@@ -113,6 +113,28 @@ begin
       Grenades[I].X;
     Grenades[I].Y := Grenades[I].YSpeed * FrameDeltaTime / 1000 +
       Grenades[I].Y;
+    if (Grenades[I].X < GRENADE_RADIUS) and (Grenades[I].XSpeed < 0) then
+    begin
+      Grenades[I].X := 2 * GRENADE_RADIUS - Grenades[I].X;
+      Grenades[I].XSpeed := -Grenades[I].XSpeed;
+    end;
+    if (Grenades[I].Y < GRENADE_RADIUS) and (Grenades[I].YSpeed < 0) then
+    begin
+      Grenades[I].Y := 2 * GRENADE_RADIUS - Grenades[I].Y;
+      Grenades[I].YSpeed := -Grenades[I].YSpeed;
+    end;
+    if (Grenades[I].X >= DISPLAY_WIDTH - GRENADE_RADIUS) and
+      (Grenades[I].XSpeed > 0) then
+    begin
+      Grenades[I].X := 2 * (DISPLAY_WIDTH - GRENADE_RADIUS) - Grenades[I].X;
+      Grenades[I].XSpeed := -Grenades[I].XSpeed;
+    end;
+    if (Grenades[I].Y >= DISPLAY_HEIGHT - GRENADE_RADIUS) and
+      (Grenades[I].YSpeed > 0) then
+    begin
+      Grenades[I].Y := 2 * (DISPLAY_HEIGHT - GRENADE_RADIUS) - Grenades[I].Y;
+      Grenades[I].YSpeed := -Grenades[I].YSpeed;
+    end;
   end;
 end;
 

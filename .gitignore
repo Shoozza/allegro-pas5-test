@@ -11,5 +11,4 @@ __history
 *.lps
 bin/*
 obj/*
-
-/test1.cfg
+*.cfg

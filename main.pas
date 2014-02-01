@@ -11,6 +11,7 @@ uses
   al5primitives,
   al5font,
   al5ttf,
+  al5image,
   SysUtils;
 
 const
@@ -54,6 +55,12 @@ begin
   if not al_init_ttf_addon then
   begin
     WriteLn('init ttf addon error');
+    halt(1);
+  end;
+
+  if not al_init_image_addon then
+  begin
+    WriteLn('init image addon error');
     halt(1);
   end;
 
@@ -119,6 +126,7 @@ begin
   al_destroy_display(Display);
   al_uninstall_keyboard;
   al_shutdown_primitives_addon;
+  al_shutdown_image_addon;
   al_shutdown_ttf_addon;
   al_shutdown_font_addon;
 end;

@@ -27,6 +27,12 @@ begin
     halt(1);
   end;
 
+  if not al_install_keyboard then
+  begin
+    WriteLn('install keyboard error');
+    halt(1);
+  end;
+
   Display := al_create_display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
   if Display = nil then
   begin
@@ -43,6 +49,7 @@ begin
     halt(1);
   end;
 
+  al_register_event_source(EventQueue, al_get_keyboard_event_source);
   al_register_event_source(EventQueue, al_get_display_event_source(display));
 end;
 
@@ -52,6 +59,7 @@ begin
 
   al_destroy_event_queue(EventQueue);
   al_destroy_display(Display);
+  al_uninstall_keyboard;
 end;
 
 procedure gameLoop;
@@ -73,6 +81,9 @@ begin
     case event._type of
       ALLEGRO_EVENT_DISPLAY_CLOSE:
         running := false;
+      ALLEGRO_EVENT_KEY_DOWN:
+        if (event.keyboard.keycode = ALLEGRO_KEY_ESCAPE) then
+          running := false;
     end;
   end;
 end;

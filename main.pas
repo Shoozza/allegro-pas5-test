@@ -9,6 +9,8 @@ implementation
 uses
   Allegro5,
   al5primitives,
+  al5font,
+  al5ttf,
   SysUtils;
 
 const
@@ -42,6 +44,13 @@ begin
   if not al_init then
   begin
     WriteLn('init error');
+    halt(1);
+  end;
+
+  al_init_font_addon;
+  if not al_init_ttf_addon then
+  begin
+    WriteLn('init ttf addon error');
     halt(1);
   end;
 
@@ -97,6 +106,8 @@ begin
   al_destroy_display(Display);
   al_uninstall_keyboard;
   al_shutdown_primitives_addon;
+  al_shutdown_ttf_addon;
+  al_shutdown_font_addon;
 end;
 
 function handleEvent(Event: ALLEGRO_EVENT): Boolean;

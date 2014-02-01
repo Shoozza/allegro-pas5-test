@@ -103,6 +103,19 @@ begin
   end;
 end;
 
+procedure update;
+var
+  I: Integer;
+begin
+  for I := 1 to High(Grenades) do
+  begin
+    Grenades[I].X := Grenades[I].XSpeed * FrameDeltaTime / 1000 +
+      Grenades[I].X;
+    Grenades[I].Y := Grenades[I].YSpeed * FrameDeltaTime / 1000 +
+      Grenades[I].Y;
+  end;
+end;
+
 procedure render;
 var
   I: Integer;
@@ -119,7 +132,6 @@ var
   Event: ALLEGRO_EVENT;
   TimeDiff: TDateTime;
   No, Seconds, MilliSeconds: Word;
-  I: Integer;
 begin
   WriteLn('run');
 
@@ -137,14 +149,7 @@ begin
       DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
       FrameDeltaTime := 1000 * Seconds + MilliSeconds;
 
-      for I := 1 to High(Grenades) do
-      begin
-        Grenades[I].X := Grenades[I].XSpeed * FrameDeltaTime / 1000 +
-          Grenades[I].X;
-        Grenades[I].Y := Grenades[I].YSpeed * FrameDeltaTime / 1000 +
-          Grenades[I].Y;
-      end;
-
+      update;
       render;
     end;
   end;

@@ -45,12 +45,12 @@ begin
   EventQueue := al_create_event_queue();
   if EventQueue = nil then
   begin
-    writeln('create event queue error');
+    WriteLn('create event queue error');
     halt(1);
   end;
 
   al_register_event_source(EventQueue, al_get_keyboard_event_source);
-  al_register_event_source(EventQueue, al_get_display_event_source(display));
+  al_register_event_source(EventQueue, al_get_display_event_source(Display));
 end;
 
 procedure cleanup;
@@ -60,6 +60,24 @@ begin
   al_destroy_event_queue(EventQueue);
   al_destroy_display(Display);
   al_uninstall_keyboard;
+end;
+
+function handleEvent(Event: ALLEGRO_EVENT): Boolean;
+begin
+  Result := true;
+  case Event._type of
+    ALLEGRO_EVENT_DISPLAY_CLOSE:
+      Result := false;
+    ALLEGRO_EVENT_KEY_DOWN:
+      if (Event.keyboard.keycode = ALLEGRO_KEY_ESCAPE) then
+        Result := false;
+  end;
+end;
+
+procedure render;
+begin
+  al_clear_to_color(al_map_rgb(0, 0, 0));
+  al_flip_display();
 end;
 
 procedure gameLoop;
@@ -73,19 +91,12 @@ begin
 
   while Running do
   begin
-    if al_get_next_event(eventQueue, event) then
+    if al_get_next_event(EventQueue, Event) then
     begin
-      case event._type of
-        ALLEGRO_EVENT_DISPLAY_CLOSE:
-          running := false;
-        ALLEGRO_EVENT_KEY_DOWN:
-          if (event.keyboard.keycode = ALLEGRO_KEY_ESCAPE) then
-            running := false;
-      end;
+      Running := handleEvent(Event);
     end else
     begin
-      al_clear_to_color(al_map_rgb(0, 0, 0));
-      al_flip_display();
+      render;
     end;
   end;
 end;

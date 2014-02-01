@@ -23,6 +23,8 @@ type
 var
   Display: ALLEGRO_DISPLAYptr;
   EventQueue: ALLEGRO_EVENT_QUEUEptr;
+  LastFrameTime: TDateTime;
+  FrameDeltaTime: Word;
   Grenades: array[1..10] of TGrenade;
 
 procedure init;
@@ -73,6 +75,8 @@ begin
     Grenades[I].Y := Random * (DISPLAY_HEIGHT - 2 * GRENADE_RADIUS) +
       GRENADE_RADIUS;
   end;
+
+  LastFrameTime := Now;
 end;
 
 procedure cleanup;
@@ -110,6 +114,8 @@ procedure gameLoop;
 var
   Running: Boolean;
   Event: ALLEGRO_EVENT;
+  TimeDiff: TDateTime;
+  No, Seconds, MilliSeconds: Word;
 begin
   WriteLn('run');
 
@@ -122,6 +128,10 @@ begin
       Running := handleEvent(Event);
     end else
     begin
+      TimeDiff := Now - LastFrameTime;
+      LastFrameTime := LastFrameTime + TimeDiff;
+      DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
+      FrameDeltaTime := 1000 * Seconds + MilliSeconds;
       render;
     end;
   end;

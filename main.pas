@@ -14,10 +14,11 @@ const
   DISPLAY_WIDTH  = 800;
   DISPLAY_HEIGHT = 600;
   GRENADE_RADIUS = 10;
+  GRENADE_SPEED = 100;
 
 type
   TGrenade = record
-    X, Y: Single;
+    X, Y, XSpeed, YSpeed: Single;
   end;
 
 var
@@ -74,6 +75,8 @@ begin
       GRENADE_RADIUS;
     Grenades[I].Y := Random * (DISPLAY_HEIGHT - 2 * GRENADE_RADIUS) +
       GRENADE_RADIUS;
+    Grenades[I].XSpeed := 2 * GRENADE_SPEED * Random - GRENADE_SPEED;
+    Grenades[I].YSpeed := 2 * GRENADE_SPEED * Random - GRENADE_SPEED;
   end;
 
   LastFrameTime := Now;
@@ -116,6 +119,7 @@ var
   Event: ALLEGRO_EVENT;
   TimeDiff: TDateTime;
   No, Seconds, MilliSeconds: Word;
+  I: Integer;
 begin
   WriteLn('run');
 
@@ -132,6 +136,15 @@ begin
       LastFrameTime := LastFrameTime + TimeDiff;
       DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
       FrameDeltaTime := 1000 * Seconds + MilliSeconds;
+
+      for I := 1 to High(Grenades) do
+      begin
+        Grenades[I].X := Grenades[I].XSpeed * FrameDeltaTime / 1000 +
+          Grenades[I].X;
+        Grenades[I].Y := Grenades[I].YSpeed * FrameDeltaTime / 1000 +
+          Grenades[I].Y;
+      end;
+
       render;
     end;
   end;

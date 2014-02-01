@@ -152,7 +152,12 @@ var
 begin
   al_clear_to_color(al_map_rgb(0, 0, 0));
   for I := 1 to High(Grenades) do
-    al_draw_pixel(Grenades[I].X, Grenades[I].Y, al_map_rgb(0, 255, 0));
+  begin
+    al_draw_filled_circle(Grenades[I].X, Grenades[I].Y, GRENADE_RADIUS,
+      al_map_rgb(0, 255, 0));
+    al_draw_filled_circle(Grenades[I].X, Grenades[I].Y, 0.8 * GRENADE_RADIUS,
+      al_map_rgb(0, 127, 0));
+  end;
   al_flip_display();
 end;
 

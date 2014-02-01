@@ -69,21 +69,23 @@ var
 begin
   WriteLn('run');
 
-  al_clear_to_color(al_map_rgb(0, 0, 0));
-  al_flip_display();
-
   Running := true;
 
   while Running do
   begin
-    al_wait_for_event(eventQueue, event);
-
-    case event._type of
-      ALLEGRO_EVENT_DISPLAY_CLOSE:
-        running := false;
-      ALLEGRO_EVENT_KEY_DOWN:
-        if (event.keyboard.keycode = ALLEGRO_KEY_ESCAPE) then
+    if al_get_next_event(eventQueue, event) then
+    begin
+      case event._type of
+        ALLEGRO_EVENT_DISPLAY_CLOSE:
           running := false;
+        ALLEGRO_EVENT_KEY_DOWN:
+          if (event.keyboard.keycode = ALLEGRO_KEY_ESCAPE) then
+            running := false;
+      end;
+    end else
+    begin
+      al_clear_to_color(al_map_rgb(0, 0, 0));
+      al_flip_display();
     end;
   end;
 end;

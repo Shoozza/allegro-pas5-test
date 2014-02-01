@@ -29,6 +29,9 @@ var
   EventQueue: ALLEGRO_EVENT_QUEUEptr;
   LastFrameTime: TDateTime;
   FrameDeltaTime: Word;
+  FpsTimer: ALLEGRO_TIMERptr;
+  Fps, ElapsedFrames: Integer;
+  Font: ALLEGRO_FONTptr;
   Grenades: array[1..10] of TGrenade;
 
 procedure init;
@@ -82,8 +85,16 @@ begin
     halt(1);
   end;
 
+  FpsTimer := al_create_timer(1);
+  al_start_timer(FpsTimer);
+  Fps := 0;
+  ElapsedFrames := 0;
+
   al_register_event_source(EventQueue, al_get_keyboard_event_source);
   al_register_event_source(EventQueue, al_get_display_event_source(Display));
+  al_register_event_source(EventQueue, al_get_timer_event_source(FpsTimer));
+
+  Font := al_load_font('media/lucon.ttf', 18, ALLEGRO_TTF_MONOCHROME);
 
   for I := 1 to High(Grenades) do
   begin
@@ -102,6 +113,8 @@ procedure cleanup;
 begin
   WriteLn('cleanup');
 
+  al_destroy_font(Font);
+  al_destroy_timer(FpsTimer);
   al_destroy_event_queue(EventQueue);
   al_destroy_display(Display);
   al_uninstall_keyboard;
@@ -117,8 +130,14 @@ begin
     ALLEGRO_EVENT_DISPLAY_CLOSE:
       Result := false;
     ALLEGRO_EVENT_KEY_DOWN:
-      if (Event.keyboard.keycode = ALLEGRO_KEY_ESCAPE) then
+      if Event.keyboard.keycode = ALLEGRO_KEY_ESCAPE then
         Result := false;
+    ALLEGRO_EVENT_TIMER:
+      if Event.timer.source = FpsTimer then
+      begin
+        Fps := ElapsedFrames;
+        ElapsedFrames := 0;
+      end;
   end;
 end;
 
@@ -160,8 +179,10 @@ end;
 procedure render;
 var
   I: Integer;
+  FpsText: String;
 begin
   al_clear_to_color(al_map_rgb(0, 0, 0));
+
   for I := 1 to High(Grenades) do
   begin
     al_draw_filled_circle(Grenades[I].X, Grenades[I].Y, GRENADE_RADIUS,
@@ -169,6 +190,11 @@ begin
     al_draw_filled_circle(Grenades[I].X, Grenades[I].Y, 0.8 * GRENADE_RADIUS,
       al_map_rgb(0, 127, 0));
   end;
+
+  FpsText := 'FPS: ' + IntToStr(Fps);
+  al_draw_text(Font, al_map_rgb(255, 255, 255), 1, 1, 0, FpsText);
+  al_draw_text(Font, al_map_rgb(255, 0, 0), 0, 0, 0, FpsText);
+
   al_flip_display();
 end;
 
@@ -194,6 +220,7 @@ begin
       LastFrameTime := LastFrameTime + TimeDiff;
       DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
       FrameDeltaTime := 1000 * Seconds + MilliSeconds;
+      Inc(ElapsedFrames);
 
       update;
       render;

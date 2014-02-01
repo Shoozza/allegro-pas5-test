@@ -10,5 +10,6 @@ __history
 *.bak
 *.lps
 bin/*
+!bin/media
 obj/*
 *.cfg

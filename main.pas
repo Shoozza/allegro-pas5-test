@@ -17,6 +17,7 @@ uses
 const
   DISPLAY_WIDTH  = 800;
   DISPLAY_HEIGHT = 600;
+  FRAME_TIMER_RATE = 60;
   GRENADE_RADIUS = 10;
   GRENADE_SPEED = 100;
   GRENADE_COUNT = 9;
@@ -34,6 +35,8 @@ var
   EventQueue: ALLEGRO_EVENT_QUEUEptr;
   LastFrameTime: TDateTime;
   FrameDeltaTime: Word;
+  FrameTimer: ALLEGRO_TIMERptr;
+  UsingFrameTimer: Boolean;
   FpsTimer: ALLEGRO_TIMERptr;
   Fps, ElapsedFrames: Integer;
   Font: ALLEGRO_FONTptr;
@@ -100,6 +103,9 @@ begin
     halt(1);
   end;
 
+  FrameTimer := al_create_timer(1/FRAME_TIMER_RATE);
+  UsingFrameTimer := false;
+
   FpsTimer := al_create_timer(1);
   al_start_timer(FpsTimer);
   Fps := 0;
@@ -107,6 +113,7 @@ begin
 
   al_register_event_source(EventQueue, al_get_keyboard_event_source);
   al_register_event_source(EventQueue, al_get_display_event_source(Display));
+  al_register_event_source(EventQueue, al_get_timer_event_source(FrameTimer));
   al_register_event_source(EventQueue, al_get_timer_event_source(FpsTimer));
 
   Font := al_load_font('media/lucon.ttf', 18, ALLEGRO_TTF_MONOCHROME);
@@ -160,6 +167,7 @@ begin
   al_destroy_bitmap(GrenadeTexture);
   al_destroy_font(Font);
   al_destroy_timer(FpsTimer);
+  al_destroy_timer(FrameTimer);
   al_destroy_event_queue(EventQueue);
   al_destroy_display(Display);
   al_uninstall_keyboard;
@@ -176,8 +184,18 @@ begin
     ALLEGRO_EVENT_DISPLAY_CLOSE:
       Result := false;
     ALLEGRO_EVENT_KEY_DOWN:
-      if Event.keyboard.keycode = ALLEGRO_KEY_ESCAPE then
-        Result := false;
+      case Event.keyboard.keycode of
+        ALLEGRO_KEY_ESCAPE:
+          Result := false;
+        ALLEGRO_KEY_F:
+        begin
+          if UsingFrameTimer then
+            al_stop_timer(FrameTimer)
+          else
+            al_start_timer(FrameTimer);
+          UsingFrameTimer := not UsingFrameTimer;
+        end;
+      end;
     ALLEGRO_EVENT_TIMER:
       if Event.timer.source = FpsTimer then
       begin
@@ -226,7 +244,8 @@ end;
 procedure render;
 var
   I: Integer;
-  FpsText: String;
+  Text: String;
+  LineHeight: Integer;
 begin
   al_draw_prim(Addr(BackgroundVertices[0]), Nil, Nil, 0, 4,
     ALLEGRO_PRIM_TRIANGLE_STRIP);
@@ -245,9 +264,16 @@ begin
   al_draw_indexed_prim(Addr(GrenadeVertices[0]), Nil, GrenadeTexture,
     GrenadeIndices, Length(GrenadeIndices), ALLEGRO_PRIM_TRIANGLE_LIST);
 
-  FpsText := 'FPS: ' + IntToStr(Fps);
-  al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 1, 0, FpsText);
-  al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 0, 0, FpsText);
+  LineHeight := al_get_font_line_height(Font);
+  Text := 'FPS: ' + IntToStr(Fps);
+  al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 1, 0, Text);
+  al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 0, 0, Text);
+  if UsingFrameTimer then
+    Text := 'Frame timer: ' + IntToStr(FRAME_TIMER_RATE) + ' [F]'
+  else
+    Text := 'Frame timer: Off [F]';
+  al_draw_text(Font, al_map_rgb(0, 0, 0), 1, LineHeight + 1, 0, Text);
+  al_draw_text(Font, al_map_rgb(255, 255, 255), 0, LineHeight, 0, Text);
 
   al_flip_display();
 end;
@@ -265,21 +291,39 @@ begin
 
   while Running do
   begin
-    if al_get_next_event(EventQueue, Event) then
+    if UsingFrameTimer then
     begin
-      Running := handleEvent(Event);
-    end else
-    begin
-      TimeDiff := Now - LastFrameTime;
-      LastFrameTime := LastFrameTime + TimeDiff;
-      DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
-      FrameDeltaTime := 1000 * Seconds + MilliSeconds;
-      Inc(ElapsedFrames);
+      al_wait_for_event(EventQueue, Event);
+      if (Event._type = ALLEGRO_EVENT_TIMER) and
+        (Event.timer.source = FrameTimer) then
+      begin
+        TimeDiff := Now - LastFrameTime;
+        LastFrameTime := LastFrameTime + TimeDiff;
+        DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
+        FrameDeltaTime := 1000 * Seconds + MilliSeconds;
+        Inc(ElapsedFrames);
 
-      update;
-      render;
-    end;
-  end;
+        update;
+        render;
+      end else
+        Running := handleEvent(Event);
+    end else // if UsingFrameTimer
+    begin
+      if al_get_next_event(EventQueue, Event) then
+        Running := handleEvent(Event)
+      else
+      begin
+        TimeDiff := Now - LastFrameTime;
+        LastFrameTime := LastFrameTime + TimeDiff;
+        DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
+        FrameDeltaTime := 1000 * Seconds + MilliSeconds;
+        Inc(ElapsedFrames);
+
+        update;
+        render;
+      end;
+    end; // if UsingFrameTimer else
+  end; // while Running
 end;
 
 procedure run;

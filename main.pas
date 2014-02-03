@@ -205,42 +205,6 @@ begin
   end;
 end;
 
-procedure update;
-var
-  I: Integer;
-begin
-  for I := 1 to High(Grenades) do
-  begin
-    Grenades[I].X := Grenades[I].XSpeed * FrameDeltaTime / 1000 +
-      Grenades[I].X;
-    Grenades[I].Y := Grenades[I].YSpeed * FrameDeltaTime / 1000 +
-      Grenades[I].Y;
-    // Border collision.
-    if (Grenades[I].X < GRENADE_RADIUS) and (Grenades[I].XSpeed < 0) then
-    begin
-      Grenades[I].X := 2 * GRENADE_RADIUS - Grenades[I].X;
-      Grenades[I].XSpeed := -Grenades[I].XSpeed;
-    end;
-    if (Grenades[I].Y < GRENADE_RADIUS) and (Grenades[I].YSpeed < 0) then
-    begin
-      Grenades[I].Y := 2 * GRENADE_RADIUS - Grenades[I].Y;
-      Grenades[I].YSpeed := -Grenades[I].YSpeed;
-    end;
-    if (Grenades[I].X >= DISPLAY_WIDTH - GRENADE_RADIUS) and
-      (Grenades[I].XSpeed > 0) then
-    begin
-      Grenades[I].X := 2 * (DISPLAY_WIDTH - GRENADE_RADIUS) - Grenades[I].X;
-      Grenades[I].XSpeed := -Grenades[I].XSpeed;
-    end;
-    if (Grenades[I].Y >= DISPLAY_HEIGHT - GRENADE_RADIUS) and
-      (Grenades[I].YSpeed > 0) then
-    begin
-      Grenades[I].Y := 2 * (DISPLAY_HEIGHT - GRENADE_RADIUS) - Grenades[I].Y;
-      Grenades[I].YSpeed := -Grenades[I].YSpeed;
-    end;
-  end;
-end;
-
 procedure render;
 var
   I: Integer;
@@ -278,12 +242,56 @@ begin
   al_flip_display();
 end;
 
+procedure update;
+var
+  TimeDiff: TDateTime;
+  No, Seconds, MilliSeconds: Word;
+  I: Integer;
+begin
+  TimeDiff := Now - LastFrameTime;
+  LastFrameTime := LastFrameTime + TimeDiff;
+  DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
+  FrameDeltaTime := 1000 * Seconds + MilliSeconds;
+  Inc(ElapsedFrames);
+
+  for I := 1 to High(Grenades) do
+  begin
+    Grenades[I].X := Grenades[I].XSpeed * FrameDeltaTime / 1000 +
+      Grenades[I].X;
+    Grenades[I].Y := Grenades[I].YSpeed * FrameDeltaTime / 1000 +
+      Grenades[I].Y;
+    // Border collision.
+    if (Grenades[I].X < GRENADE_RADIUS) and (Grenades[I].XSpeed < 0) then
+    begin
+      Grenades[I].X := 2 * GRENADE_RADIUS - Grenades[I].X;
+      Grenades[I].XSpeed := -Grenades[I].XSpeed;
+    end;
+    if (Grenades[I].Y < GRENADE_RADIUS) and (Grenades[I].YSpeed < 0) then
+    begin
+      Grenades[I].Y := 2 * GRENADE_RADIUS - Grenades[I].Y;
+      Grenades[I].YSpeed := -Grenades[I].YSpeed;
+    end;
+    if (Grenades[I].X >= DISPLAY_WIDTH - GRENADE_RADIUS) and
+      (Grenades[I].XSpeed > 0) then
+    begin
+      Grenades[I].X := 2 * (DISPLAY_WIDTH - GRENADE_RADIUS) - Grenades[I].X;
+      Grenades[I].XSpeed := -Grenades[I].XSpeed;
+    end;
+    if (Grenades[I].Y >= DISPLAY_HEIGHT - GRENADE_RADIUS) and
+      (Grenades[I].YSpeed > 0) then
+    begin
+      Grenades[I].Y := 2 * (DISPLAY_HEIGHT - GRENADE_RADIUS) - Grenades[I].Y;
+      Grenades[I].YSpeed := -Grenades[I].YSpeed;
+    end;
+  end;
+
+  render;
+end;
+
 procedure gameLoop;
 var
   Running: Boolean;
   Event: ALLEGRO_EVENT;
-  TimeDiff: TDateTime;
-  No, Seconds, MilliSeconds: Word;
 begin
   WriteLn('run');
 
@@ -296,32 +304,15 @@ begin
       al_wait_for_event(EventQueue, Event);
       if (Event._type = ALLEGRO_EVENT_TIMER) and
         (Event.timer.source = FrameTimer) then
-      begin
-        TimeDiff := Now - LastFrameTime;
-        LastFrameTime := LastFrameTime + TimeDiff;
-        DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
-        FrameDeltaTime := 1000 * Seconds + MilliSeconds;
-        Inc(ElapsedFrames);
-
-        update;
-        render;
-      end else
+        update
+      else
         Running := handleEvent(Event);
     end else // if UsingFrameTimer
     begin
       if al_get_next_event(EventQueue, Event) then
         Running := handleEvent(Event)
       else
-      begin
-        TimeDiff := Now - LastFrameTime;
-        LastFrameTime := LastFrameTime + TimeDiff;
-        DecodeTime(TimeDiff, No, No, Seconds, MilliSeconds);
-        FrameDeltaTime := 1000 * Seconds + MilliSeconds;
-        Inc(ElapsedFrames);
-
         update;
-        render;
-      end;
     end; // if UsingFrameTimer else
   end; // while Running
 end;

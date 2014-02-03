@@ -246,8 +246,8 @@ begin
     GrenadeIndices, Length(GrenadeIndices), ALLEGRO_PRIM_TRIANGLE_LIST);
 
   FpsText := 'FPS: ' + IntToStr(Fps);
-  al_draw_text(Font, al_map_rgb(255, 255, 255), 1, 1, 0, FpsText);
-  al_draw_text(Font, al_map_rgb(255, 0, 0), 0, 0, 0, FpsText);
+  al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 1, 0, FpsText);
+  al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 0, 0, FpsText);
 
   al_flip_display();
 end;

@@ -19,6 +19,10 @@ const
   DISPLAY_HEIGHT = 600;
   GRENADE_RADIUS = 10;
   GRENADE_SPEED = 100;
+  GRENADE_COUNT = 9;
+
+  GRENADE_VERTEX_COUNT = GRENADE_COUNT*4;
+  GRENADE_INDEX_COUNT = GRENADE_COUNT*6;
 
 type
   TGrenade = record
@@ -33,7 +37,10 @@ var
   FpsTimer: ALLEGRO_TIMERptr;
   Fps, ElapsedFrames: Integer;
   Font: ALLEGRO_FONTptr;
-  Grenades: array[1..10] of TGrenade;
+  GrenadeTexture: ALLEGRO_BITMAPptr;
+  Grenades: array[1..GRENADE_COUNT] of TGrenade;
+  GrenadeVertices: array[0..GRENADE_VERTEX_COUNT - 1] of ALLEGRO_VERTEX;
+  GrenadeIndices: array[0..GRENADE_INDEX_COUNT - 1] of Integer;
 
 procedure init;
 var
@@ -103,6 +110,8 @@ begin
 
   Font := al_load_font('media/lucon.ttf', 18, ALLEGRO_TTF_MONOCHROME);
 
+  GrenadeTexture := al_load_bitmap('media/nade.png');
+
   for I := 1 to High(Grenades) do
   begin
     Grenades[I].X := Random * (DISPLAY_WIDTH - 2 * GRENADE_RADIUS) +
@@ -113,6 +122,21 @@ begin
     Grenades[I].YSpeed := 2 * GRENADE_SPEED * Random - GRENADE_SPEED;
   end;
 
+  for I := 0 to High(GrenadeVertices) do
+  begin
+    GrenadeVertices[I].z := 0;
+    // Make texcoord squares: (0, 0), (1, 0), (0, 1), (1, 1), repeat...
+    GrenadeVertices[I].u := I mod 2 * al_get_bitmap_width(GrenadeTexture);
+    GrenadeVertices[I].v := I div 2 mod 2 * al_get_bitmap_height(GrenadeTexture);
+    GrenadeVertices[I].color := al_map_rgb(255, 255, 255);
+  end;
+
+  for I := 0 to High(GrenadeIndices) do
+    // Make index pattern: 0, 1, 2, 1, 2, 3,
+    //                     4, 5, 6, 5, 6, 7,
+    //                     ...
+    GrenadeIndices[I] := (I mod 3) + (I div 3 mod 2) + (I div 6 * 4);
+
   LastFrameTime := Now;
 end;
 
@@ -120,6 +144,7 @@ procedure cleanup;
 begin
   WriteLn('cleanup');
 
+  al_destroy_bitmap(GrenadeTexture);
   al_destroy_font(Font);
   al_destroy_timer(FpsTimer);
   al_destroy_event_queue(EventQueue);
@@ -159,6 +184,7 @@ begin
       Grenades[I].X;
     Grenades[I].Y := Grenades[I].YSpeed * FrameDeltaTime / 1000 +
       Grenades[I].Y;
+    // Border collision.
     if (Grenades[I].X < GRENADE_RADIUS) and (Grenades[I].XSpeed < 0) then
     begin
       Grenades[I].X := 2 * GRENADE_RADIUS - Grenades[I].X;
@@ -193,11 +219,17 @@ begin
 
   for I := 1 to High(Grenades) do
   begin
-    al_draw_filled_circle(Grenades[I].X, Grenades[I].Y, GRENADE_RADIUS,
-      al_map_rgb(0, 255, 0));
-    al_draw_filled_circle(Grenades[I].X, Grenades[I].Y, 0.8 * GRENADE_RADIUS,
-      al_map_rgb(0, 127, 0));
+    GrenadeVertices[I * 4 - 4].x := Grenades[I].X - GRENADE_RADIUS;
+    GrenadeVertices[I * 4 - 4].y := Grenades[I].Y - GRENADE_RADIUS;
+    GrenadeVertices[I * 4 - 3].x := Grenades[I].X + GRENADE_RADIUS;
+    GrenadeVertices[I * 4 - 3].y := Grenades[I].Y - GRENADE_RADIUS;
+    GrenadeVertices[I * 4 - 2].x := Grenades[I].X - GRENADE_RADIUS;
+    GrenadeVertices[I * 4 - 2].y := Grenades[I].Y + GRENADE_RADIUS;
+    GrenadeVertices[I * 4 - 1].x := Grenades[I].X + GRENADE_RADIUS;
+    GrenadeVertices[I * 4 - 1].y := Grenades[I].Y + GRENADE_RADIUS;
   end;
+  al_draw_indexed_prim(Addr(GrenadeVertices[0]), Nil, GrenadeTexture,
+    GrenadeIndices, Length(GrenadeIndices), ALLEGRO_PRIM_TRIANGLE_LIST);
 
   FpsText := 'FPS: ' + IntToStr(Fps);
   al_draw_text(Font, al_map_rgb(255, 255, 255), 1, 1, 0, FpsText);

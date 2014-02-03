@@ -41,6 +41,7 @@ var
   Grenades: array[1..GRENADE_COUNT] of TGrenade;
   GrenadeVertices: array[0..GRENADE_VERTEX_COUNT - 1] of ALLEGRO_VERTEX;
   GrenadeIndices: array[0..GRENADE_INDEX_COUNT - 1] of Integer;
+  BackgroundVertices: array[0..3] of ALLEGRO_VERTEX;
 
 procedure init;
 var
@@ -137,6 +138,18 @@ begin
     //                     ...
     GrenadeIndices[I] := (I mod 3) + (I div 3 mod 2) + (I div 6 * 4);
 
+  for I := 0 to High(BackgroundVertices) do
+  begin
+    // Make vertex rectangle.
+    BackgroundVertices[I].x := I mod 2 * DISPLAY_WIDTH;
+    BackgroundVertices[I].y := I div 2 mod 2 * DISPLAY_HEIGHT;
+    BackgroundVertices[I].z := 0;
+  end;
+  BackgroundVertices[0].color := al_map_rgb(198, 163, 204);
+  BackgroundVertices[1].color := al_map_rgb(198, 163, 204);
+  BackgroundVertices[2].color := al_map_rgb(16, 24, 15);
+  BackgroundVertices[3].color := al_map_rgb(16, 24, 15);
+
   LastFrameTime := Now;
 end;
 
@@ -215,7 +228,8 @@ var
   I: Integer;
   FpsText: String;
 begin
-  al_clear_to_color(al_map_rgb(0, 0, 0));
+  al_draw_prim(Addr(BackgroundVertices[0]), Nil, Nil, 0, 4,
+    ALLEGRO_PRIM_TRIANGLE_STRIP);
 
   for I := 1 to High(Grenades) do
   begin

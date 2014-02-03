@@ -89,6 +89,12 @@ begin
     halt(1);
   end;
 
+  if not al_install_mouse then
+  begin
+    WriteLn('install mouse error');
+    halt(1);
+  end;
+
   Display := al_create_display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
   if Display = nil then
   begin
@@ -114,6 +120,7 @@ begin
   ElapsedFrames := 0;
 
   al_register_event_source(EventQueue, al_get_keyboard_event_source);
+  al_register_event_source(EventQueue, al_get_mouse_event_source);
   al_register_event_source(EventQueue, al_get_display_event_source(Display));
   al_register_event_source(EventQueue, al_get_timer_event_source(FrameTimer));
   al_register_event_source(EventQueue, al_get_timer_event_source(FpsTimer));
@@ -174,6 +181,7 @@ begin
   al_destroy_timer(FrameTimer);
   al_destroy_event_queue(EventQueue);
   al_destroy_display(Display);
+  al_uninstall_mouse;
   al_uninstall_keyboard;
   al_shutdown_primitives_addon;
   al_shutdown_image_addon;

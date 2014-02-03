@@ -17,6 +17,7 @@ uses
 const
   DISPLAY_WIDTH  = 800;
   DISPLAY_HEIGHT = 600;
+  WINDOW_TITLE = 'allegro-pas5 test1';
   FRAME_TIMER_RATE = 60;
   GRENADE_RADIUS = 10;
   GRENADE_SPEED = 100;
@@ -45,6 +46,7 @@ var
   GrenadeVertices: array[0..GRENADE_VERTEX_COUNT - 1] of ALLEGRO_VERTEX;
   GrenadeIndices: array[0..GRENADE_INDEX_COUNT - 1] of Integer;
   BackgroundVertices: array[0..3] of ALLEGRO_VERTEX;
+  ShowingText: Boolean;
 
 procedure init;
 var
@@ -94,7 +96,7 @@ begin
     halt(1);
   end;
 
-  al_set_window_title(Display, 'allegro-pas5 test1');
+  al_set_window_title(Display, WINDOW_TITLE);
 
   EventQueue := al_create_event_queue();
   if EventQueue = nil then
@@ -157,6 +159,8 @@ begin
   BackgroundVertices[2].color := al_map_rgb(16, 24, 15);
   BackgroundVertices[3].color := al_map_rgb(16, 24, 15);
 
+  ShowingText := true;
+
   LastFrameTime := Now;
 end;
 
@@ -195,12 +199,21 @@ begin
             al_start_timer(FrameTimer);
           UsingFrameTimer := not UsingFrameTimer;
         end;
+        ALLEGRO_KEY_T:
+        begin
+          if not ShowingText then
+            al_set_window_title(Display, WINDOW_TITLE);
+          ShowingText := not ShowingText;
+        end;
       end;
     ALLEGRO_EVENT_TIMER:
       if Event.timer.source = FpsTimer then
       begin
         Fps := ElapsedFrames;
         ElapsedFrames := 0;
+        if not ShowingText then
+          al_set_window_title(Display, WINDOW_TITLE + ' [FPS: ' + IntToStr(Fps) +
+            ']');
       end;
   end;
 end;
@@ -228,16 +241,22 @@ begin
   al_draw_indexed_prim(Addr(GrenadeVertices[0]), Nil, GrenadeTexture,
     GrenadeIndices, Length(GrenadeIndices), ALLEGRO_PRIM_TRIANGLE_LIST);
 
-  LineHeight := al_get_font_line_height(Font);
-  Text := 'FPS: ' + IntToStr(Fps);
-  al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 1, 0, Text);
-  al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 0, 0, Text);
-  if UsingFrameTimer then
-    Text := 'Frame timer: ' + IntToStr(FRAME_TIMER_RATE) + ' [F]'
-  else
-    Text := 'Frame timer: Off [F]';
-  al_draw_text(Font, al_map_rgb(0, 0, 0), 1, LineHeight + 1, 0, Text);
-  al_draw_text(Font, al_map_rgb(255, 255, 255), 0, LineHeight, 0, Text);
+  if ShowingText then
+  begin
+    LineHeight := al_get_font_line_height(Font);
+    Text := 'FPS: ' + IntToStr(Fps);
+    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 1, 0, Text);
+    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 0, 0, Text);
+    if UsingFrameTimer then
+      Text := 'Frame timer: ' + IntToStr(FRAME_TIMER_RATE) + ' [F]'
+    else
+      Text := 'Frame timer: Off [F]';
+    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, LineHeight + 1, 0, Text);
+    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, LineHeight, 0, Text);
+    Text := 'Showing text [T]';
+    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 2 * LineHeight + 1, 0, Text);
+    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 2 * LineHeight, 0, Text);
+  end;
 
   al_flip_display();
 end;

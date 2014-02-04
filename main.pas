@@ -25,6 +25,7 @@ const
   GRENADE_SPEED = 100;
   GRENADE_COUNT = 9;
   ZOOM_AMOUNT = 2;
+  RESERVED_SAMPLES = 1;
   MUSIC_GAIN = 0.5;
 
   GRENADE_VERTEX_COUNT = GRENADE_COUNT*4;
@@ -94,7 +95,7 @@ begin
     WriteLn('init acodec addon error');
     halt(1);
   end;
-  if not al_reserve_samples(1) then
+  if not al_reserve_samples(RESERVED_SAMPLES) then
   begin
     WriteLn('reserve samples error');
     halt(1);

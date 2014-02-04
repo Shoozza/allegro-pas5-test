@@ -127,6 +127,30 @@ begin
   end;
 end;
 
+procedure init_resources;
+begin
+  Music := al_load_sample('media/music.ogg');
+  if Music = nil then
+  begin
+    WriteLn('load music sample error');
+    halt(1);
+  end;
+
+  Font := al_load_font('media/lucon.ttf', 18, ALLEGRO_TTF_MONOCHROME);
+  if Font = nil then
+  begin
+    WriteLn('load font error');
+    halt(1);
+  end;
+
+  GrenadeTexture := al_load_bitmap('media/nade.png');
+  if GrenadeTexture = nil then
+  begin
+    WriteLn('load grenade bitmap error');
+    halt(1);
+  end;
+end;
+
 procedure init;
 var
   I: Integer;
@@ -141,12 +165,8 @@ begin
   DecodeTime(Now, No, No, No, Seed);
   RandSeed := Seed;
 
-  Music := al_load_sample('media/music.ogg');
-  if Music = nil then
-  begin
-    WriteLn('load music sample error');
-    halt(1);
-  end;
+  init_resources;
+
   al_play_sample(Music, MUSIC_GAIN, 0, 1, ALLEGRO_PLAYMODE_LOOP, Addr(MusicId));
 
   FrameTimer := al_create_timer(1/FRAME_TIMER_RATE);
@@ -162,20 +182,6 @@ begin
   al_register_event_source(EventQueue, al_get_display_event_source(Display));
   al_register_event_source(EventQueue, al_get_timer_event_source(FrameTimer));
   al_register_event_source(EventQueue, al_get_timer_event_source(FpsTimer));
-
-  Font := al_load_font('media/lucon.ttf', 18, ALLEGRO_TTF_MONOCHROME);
-  if Font = nil then
-  begin
-    WriteLn('load font error');
-    halt(1);
-  end;
-
-  GrenadeTexture := al_load_bitmap('media/nade.png');
-  if GrenadeTexture = nil then
-  begin
-    WriteLn('load grenade bitmap error');
-    halt(1);
-  end;
 
   for I := 1 to High(Grenades) do
   begin

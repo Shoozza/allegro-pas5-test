@@ -12,6 +12,8 @@ uses
   al5font,
   al5ttf,
   al5image,
+  al5audio,
+  al5acodec,
   SysUtils;
 
 const
@@ -83,6 +85,17 @@ begin
   if not al_init_primitives_addon then
   begin
     WriteLn('init primitives addon error');
+    halt(1);
+  end;
+
+  if not al_install_audio then
+  begin
+    WriteLn('install audio error');
+    halt(1);
+  end;
+  if not al_init_acodec_addon then
+  begin
+    WriteLn('init acodec addon error');
     halt(1);
   end;
 
@@ -187,6 +200,7 @@ begin
   al_destroy_display(Display);
   al_uninstall_mouse;
   al_uninstall_keyboard;
+  al_uninstall_audio;
   al_shutdown_primitives_addon;
   al_shutdown_image_addon;
   al_shutdown_ttf_addon;

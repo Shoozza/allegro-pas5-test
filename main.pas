@@ -22,6 +22,7 @@ const
   GRENADE_RADIUS = 10;
   GRENADE_SPEED = 100;
   GRENADE_COUNT = 9;
+  ZOOM_AMOUNT = 2;
 
   GRENADE_VERTEX_COUNT = GRENADE_COUNT*4;
   GRENADE_INDEX_COUNT = GRENADE_COUNT*6;
@@ -47,6 +48,8 @@ var
   GrenadeIndices: array[0..GRENADE_INDEX_COUNT - 1] of Integer;
   BackgroundVertices: array[0..3] of ALLEGRO_VERTEX;
   ShowingText: Boolean;
+  Zoomed: Boolean;
+  XZoom, YZoom: Single;
 
 procedure init;
 var
@@ -167,6 +170,7 @@ begin
   BackgroundVertices[3].color := al_map_rgb(16, 24, 15);
 
   ShowingText := true;
+  Zoomed := false;
 
   LastFrameTime := Now;
 end;
@@ -214,6 +218,9 @@ begin
           ShowingText := not ShowingText;
         end;
       end;
+    ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+      if Event.mouse.button = 2 then
+        Zoomed := not Zoomed;
     ALLEGRO_EVENT_TIMER:
       if Event.timer.source = FpsTimer then
       begin
@@ -223,7 +230,7 @@ begin
           al_set_window_title(Display, WINDOW_TITLE + ' [FPS: ' + IntToStr(Fps) +
             ']');
       end;
-  end;
+  end; // case Event._type
 end;
 
 procedure render;
@@ -231,7 +238,16 @@ var
   I: Integer;
   Text: String;
   LineHeight: Integer;
+  Transform: ALLEGRO_TRANSFORM;
 begin
+  al_identity_transform(Transform);
+  if Zoomed then
+  begin
+    al_translate_transform(Transform, -XZoom, -YZoom);
+    al_scale_transform(Transform, ZOOM_AMOUNT, ZOOM_AMOUNT);
+  end;
+  al_use_transform(Transform);
+
   al_draw_prim(Addr(BackgroundVertices[0]), Nil, Nil, 0, 4,
     ALLEGRO_PRIM_TRIANGLE_STRIP);
 
@@ -249,6 +265,8 @@ begin
   al_draw_indexed_prim(Addr(GrenadeVertices[0]), Nil, GrenadeTexture,
     GrenadeIndices, Length(GrenadeIndices), ALLEGRO_PRIM_TRIANGLE_LIST);
 
+  al_identity_transform(Transform);
+  al_use_transform(Transform);
   if ShowingText then
   begin
     LineHeight := al_get_font_line_height(Font);
@@ -264,6 +282,12 @@ begin
     Text := 'Showing text [T]';
     al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 2 * LineHeight + 1, 0, Text);
     al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 2 * LineHeight, 0, Text);
+    if Zoomed then
+      Text := 'Zoom: ' + IntToStr(ZOOM_AMOUNT) + ' [MB2]'
+    else
+      Text := 'Zoom: 1 [MB2]';
+    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 3 * LineHeight + 1, 0, Text);
+    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 3 * LineHeight, 0, Text);
   end;
 
   al_flip_display();
@@ -274,6 +298,7 @@ var
   TimeDiff: TDateTime;
   No, Seconds, MilliSeconds: Word;
   I: Integer;
+  MouseState: ALLEGRO_MOUSE_STATE;
 begin
   TimeDiff := Now - LastFrameTime;
   LastFrameTime := LastFrameTime + TimeDiff;
@@ -310,6 +335,21 @@ begin
       Grenades[I].Y := 2 * (DISPLAY_HEIGHT - GRENADE_RADIUS) - Grenades[I].Y;
       Grenades[I].YSpeed := -Grenades[I].YSpeed;
     end;
+  end;
+
+  if Zoomed then
+  begin
+    al_get_mouse_state(Addr(MouseState));
+    XZoom := MouseState.x - DISPLAY_WIDTH / ZOOM_AMOUNT / 2;
+    YZoom := MouseState.y - DISPLAY_HEIGHT / ZOOM_AMOUNT / 2;
+    if XZoom < 0 then
+      XZoom := 0;
+    if YZoom < 0 then
+      YZoom := 0;
+    if XZoom > DISPLAY_WIDTH - DISPLAY_WIDTH / ZOOM_AMOUNT then
+      XZoom := DISPLAY_WIDTH - DISPLAY_WIDTH / ZOOM_AMOUNT;
+    if YZoom > DISPLAY_HEIGHT - DISPLAY_HEIGHT / ZOOM_AMOUNT then
+      YZoom := DISPLAY_HEIGHT - DISPLAY_HEIGHT / ZOOM_AMOUNT;
   end;
 
   render;

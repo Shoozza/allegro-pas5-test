@@ -25,6 +25,7 @@ const
   GRENADE_SPEED = 100;
   GRENADE_COUNT = 9;
   ZOOM_AMOUNT = 2;
+  MUSIC_GAIN = 0.5;
 
   GRENADE_VERTEX_COUNT = GRENADE_COUNT*4;
   GRENADE_INDEX_COUNT = GRENADE_COUNT*6;
@@ -37,6 +38,8 @@ type
 var
   Display: ALLEGRO_DISPLAYptr;
   EventQueue: ALLEGRO_EVENT_QUEUEptr;
+  Music: ALLEGRO_SAMPLEptr;
+  MusicId: ALLEGRO_SAMPLE_ID;
   LastFrameTime: TDateTime;
   FrameDeltaTime: Word;
   FrameTimer: ALLEGRO_TIMERptr;
@@ -52,6 +55,7 @@ var
   ShowingText: Boolean;
   Zoomed: Boolean;
   XZoom, YZoom: Single;
+  MusicMuted: Boolean;
 
 procedure init;
 var
@@ -98,6 +102,11 @@ begin
     WriteLn('init acodec addon error');
     halt(1);
   end;
+  if not al_reserve_samples(1) then
+  begin
+    WriteLn('reserve samples error');
+    halt(1);
+  end;
 
   if not al_install_keyboard then
   begin
@@ -126,6 +135,9 @@ begin
     WriteLn('create event queue error');
     halt(1);
   end;
+
+  Music := al_load_sample('media/music.ogg');
+  al_play_sample(Music, MUSIC_GAIN, 0, 1, ALLEGRO_PLAYMODE_LOOP, Addr(MusicId));
 
   FrameTimer := al_create_timer(1/FRAME_TIMER_RATE);
   UsingFrameTimer := false;
@@ -184,6 +196,7 @@ begin
 
   ShowingText := true;
   Zoomed := false;
+  MusicMuted := false;
 
   LastFrameTime := Now;
 end;
@@ -194,6 +207,7 @@ begin
 
   al_destroy_bitmap(GrenadeTexture);
   al_destroy_font(Font);
+  al_destroy_sample(Music);
   al_destroy_timer(FpsTimer);
   al_destroy_timer(FrameTimer);
   al_destroy_event_queue(EventQueue);
@@ -230,6 +244,15 @@ begin
           if not ShowingText then
             al_set_window_title(Display, WINDOW_TITLE);
           ShowingText := not ShowingText;
+        end;
+        ALLEGRO_KEY_M:
+        begin
+          if MusicMuted then
+            al_play_sample(Music, MUSIC_GAIN, 0, 1, ALLEGRO_PLAYMODE_LOOP,
+              Addr(MusicId))
+          else
+            al_stop_sample(Addr(MusicId));
+          MusicMuted := not MusicMuted;
         end;
       end;
     ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
@@ -302,6 +325,12 @@ begin
       Text := 'Zoom: 1 [MB2]';
     al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 3 * LineHeight + 1, 0, Text);
     al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 3 * LineHeight, 0, Text);
+    if MusicMuted then
+      Text := 'Music: Off [M]'
+    else
+      Text := 'Music: On [M]';
+    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 4 * LineHeight + 1, 0, Text);
+    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 4 * LineHeight, 0, Text);
   end;
 
   al_flip_display();

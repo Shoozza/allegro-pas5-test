@@ -57,16 +57,8 @@ var
   XZoom, YZoom: Single;
   MusicMuted: Boolean;
 
-procedure init;
-var
-  I: Integer;
-  No, Seed: Word;
+procedure init_allegro;
 begin
-  WriteLn('init');
-
-  DecodeTime(Now, No, No, No, Seed);
-  RandSeed := Seed;
-
   if not al_init then
   begin
     WriteLn('init error');
@@ -127,14 +119,27 @@ begin
     halt(1);
   end;
 
-  al_set_window_title(Display, WINDOW_TITLE);
-
   EventQueue := al_create_event_queue();
   if EventQueue = nil then
   begin
     WriteLn('create event queue error');
     halt(1);
   end;
+end;
+
+procedure init;
+var
+  I: Integer;
+  No, Seed: Word;
+begin
+  WriteLn('init');
+
+  init_allegro;
+
+  al_set_window_title(Display, WINDOW_TITLE);
+
+  DecodeTime(Now, No, No, No, Seed);
+  RandSeed := Seed;
 
   Music := al_load_sample('media/music.ogg');
   if Music = nil then

@@ -49,6 +49,7 @@ var
   Fps, ElapsedFrames: Integer;
   Font: ALLEGRO_FONTptr;
   GrenadeTexture: ALLEGRO_BITMAPptr;
+  BackgroundTexture: ALLEGRO_BITMAPptr;
   Grenades: array[1..GRENADE_COUNT] of TGrenade;
   GrenadeVertices: array[0..GRENADE_VERTEX_COUNT - 1] of ALLEGRO_VERTEX;
   GrenadeIndices: array[0..GRENADE_INDEX_COUNT - 1] of Integer;
@@ -150,6 +151,13 @@ begin
     WriteLn('load grenade bitmap error');
     halt(1);
   end;
+
+  BackgroundTexture := al_load_bitmap('media/ananas.bmp');
+  if BackgroundTexture = nil then
+  begin
+    WriteLn('load background bitmap error');
+    halt(1);
+  end;
 end;
 
 procedure init;
@@ -211,10 +219,12 @@ begin
 
   for I := 0 to High(BackgroundVertices) do
   begin
-    // Make vertex rectangle.
+    // Make vertex and texcoord rectangle.
     BackgroundVertices[I].x := I mod 2 * DISPLAY_WIDTH;
     BackgroundVertices[I].y := I div 2 mod 2 * DISPLAY_HEIGHT;
     BackgroundVertices[I].z := 0;
+    BackgroundVertices[I].u := I mod 2 * DISPLAY_WIDTH;
+    BackgroundVertices[I].v := I div 2 mod 2 * DISPLAY_HEIGHT;
   end;
   BackgroundVertices[0].color := al_map_rgb(198, 163, 204);
   BackgroundVertices[1].color := al_map_rgb(198, 163, 204);
@@ -232,6 +242,7 @@ procedure cleanup;
 begin
   WriteLn('cleanup');
 
+  al_destroy_bitmap(BackgroundTexture);
   al_destroy_bitmap(GrenadeTexture);
   al_destroy_font(Font);
   al_destroy_sample(Music);
@@ -312,7 +323,7 @@ begin
   end;
   al_use_transform(Transform);
 
-  al_draw_prim(Addr(BackgroundVertices[0]), Nil, Nil, 0, 4,
+  al_draw_prim(Addr(BackgroundVertices[0]), Nil, BackgroundTexture, 0, 4,
     ALLEGRO_PRIM_TRIANGLE_STRIP);
 
   for I := 1 to High(Grenades) do

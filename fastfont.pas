@@ -200,7 +200,7 @@ begin
 end;
 
 procedure TFastFont.set_ex(Color, Shadow: ALLEGRO_COLOR; LineSpacing: Integer);
-begin 
+begin
   if not Loaded then
     exit;
 
@@ -210,7 +210,7 @@ begin
 end;
 
 procedure TFastFont.add_ex(X, Y: Single; const Text: String);
-begin    
+begin
   if not Loaded then
     exit;
 
@@ -222,7 +222,7 @@ end;
 procedure TFastFont.add_ex(X, Y: Single; const Texts: array of String);
 var
   I: Integer;
-begin   
+begin
   if not Loaded then
     exit;
 
@@ -231,7 +231,7 @@ begin
 end;
 
 procedure TFastFont.draw;
-begin     
+begin
   if not Loaded then
     exit;
 

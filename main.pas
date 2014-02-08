@@ -185,10 +185,9 @@ begin
 
   init_resources;
 
-  al_play_sample(Music, MUSIC_GAIN, 0, 1, ALLEGRO_PLAYMODE_LOOP, Addr(MusicId));
-
   FrameTimer := al_create_timer(1/FRAME_TIMER_RATE);
-  UsingFrameTimer := false;
+  al_start_timer(FrameTimer);
+  UsingFrameTimer := true;
 
   FpsTimer := al_create_timer(1);
   al_start_timer(FpsTimer);
@@ -242,7 +241,7 @@ begin
 
   ShowingText := true;
   Zoomed := false;
-  MusicMuted := false;
+  MusicMuted := true;
 
   LastFrameTime := Now;
 end;

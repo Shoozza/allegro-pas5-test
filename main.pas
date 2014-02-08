@@ -49,7 +49,7 @@ var
   FpsTimer: ALLEGRO_TIMERptr;
   Fps, ElapsedFrames: Integer;
   Font: ALLEGRO_FONTptr;
-  FastFont: TFastFont;
+  FontDrawer: TFastFont;
   GrenadeTexture: ALLEGRO_BITMAPptr;
   BackgroundTexture: ALLEGRO_BITMAPptr;
   Grenades: array[1..GRENADE_COUNT] of TGrenade;
@@ -146,13 +146,13 @@ begin
     WriteLn('load font error');
     halt(1);
   end;
-  FastFont := TFastFont.create(Font);
-  if FastFont = nil then
+  FontDrawer := TFastFont.create(Font);
+  if FontDrawer = nil then
   begin
     WriteLn('create fast font error');
     halt(1);
   end;
-  FastFont.set_ex(al_map_rgb(255, 255, 255), al_map_rgba(0, 0, 0, 127), 2);
+  FontDrawer.set_ex(al_map_rgb(255, 255, 255), al_map_rgba(0, 0, 0, 127), 2);
 
   GrenadeTexture := al_load_bitmap('media/nade.png');
   if GrenadeTexture = nil then
@@ -252,7 +252,7 @@ begin
 
   al_destroy_bitmap(BackgroundTexture);
   al_destroy_bitmap(GrenadeTexture);
-  FastFont.destroy;
+  FontDrawer.destroy;
   al_destroy_font(Font);
   al_destroy_sample(Music);
   al_destroy_timer(FpsTimer);
@@ -354,31 +354,31 @@ begin
   if ShowingText then
   begin
     LineHeight := al_get_font_line_height(Font) + 2;
-    FastFont.clear;
+    FontDrawer.clear;
     Text := 'FPS: ' + IntToStr(Fps);
-    FastFont.add_ex(0, 0, Text);
+    FontDrawer.add_ex(0, 0, Text);
     if UsingFrameTimer then
       Text := 'Frame timer: ' + IntToStr(FRAME_TIMER_RATE) + ' [F]'
     else
       Text := 'Frame timer: Off [F]';
-    FastFont.add_ex(0, LineHeight, Text);
+    FontDrawer.add_ex(0, LineHeight, Text);
     Text := 'Showing text [T]';
-    FastFont.add_ex(0, 2 * LineHeight, Text);
+    FontDrawer.add_ex(0, 2 * LineHeight, Text);
     if Zoomed then
       Text := 'Zoom: ' + IntToStr(ZOOM_AMOUNT) + ' [MB2]'
     else
       Text := 'Zoom: 1 [MB2]';
-    FastFont.add_ex(0, 3 * LineHeight, Text);
+    FontDrawer.add_ex(0, 3 * LineHeight, Text);
     if MusicMuted then
       Text := 'Music: Off [M]'
     else
       Text := 'Music: On [M]';
-    FastFont.add_ex(0, 4 * LineHeight, Text);
+    FontDrawer.add_ex(0, 4 * LineHeight, Text);
 
-    FastFont.add_ex(50, 200, ['1 Desert Eagles', '2 HK MP5', '3 AK-74',
+    FontDrawer.add_ex(50, 200, ['1 Desert Eagles', '2 HK MP5', '3 AK-74',
       '4 Steyr AUG', '5 Spas-12', '6 Ruger 77', '7 M79', '8 Barrett M82A1',
       '9 FN Minimi', '0 XM214 Minigun']);
-    FastFont.draw;
+    FontDrawer.draw;
   end;
 
   al_flip_display();

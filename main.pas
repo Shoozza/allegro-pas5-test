@@ -375,6 +375,10 @@ begin
     else
       Text := 'Music: On [M]';
     FastFont.add_ex(0, 4 * LineHeight, Text);
+
+    FastFont.add_ex(50, 200, ['1 Desert Eagles', '2 HK MP5', '3 AK-74',
+      '4 Steyr AUG', '5 Spas-12', '6 Ruger 77', '7 M79', '8 Barrett M82A1',
+      '9 FN Minimi', '0 XM214 Minigun']);
     FastFont.draw;
   end;
 

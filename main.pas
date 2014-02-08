@@ -14,6 +14,7 @@ uses
   al5image,
   al5audio,
   al5acodec,
+  fastfont,
   SysUtils;
 
 const
@@ -48,6 +49,7 @@ var
   FpsTimer: ALLEGRO_TIMERptr;
   Fps, ElapsedFrames: Integer;
   Font: ALLEGRO_FONTptr;
+  FastFont: TFastFont;
   GrenadeTexture: ALLEGRO_BITMAPptr;
   BackgroundTexture: ALLEGRO_BITMAPptr;
   Grenades: array[1..GRENADE_COUNT] of TGrenade;
@@ -138,12 +140,19 @@ begin
     halt(1);
   end;
 
-  Font := al_load_font('media/lucon.ttf', 18, ALLEGRO_TTF_MONOCHROME);
+  Font := al_load_font('media/lucon.ttf', 14, ALLEGRO_TTF_MONOCHROME);
   if Font = nil then
   begin
     WriteLn('load font error');
     halt(1);
   end;
+  FastFont := TFastFont.create(Font);
+  if FastFont = nil then
+  begin
+    WriteLn('create fast font error');
+    halt(1);
+  end;
+  FastFont.set_ex(al_map_rgb(255, 255, 255), al_map_rgba(0, 0, 0, 127), 2);
 
   GrenadeTexture := al_load_bitmap('media/nade.png');
   if GrenadeTexture = nil then
@@ -244,6 +253,7 @@ begin
 
   al_destroy_bitmap(BackgroundTexture);
   al_destroy_bitmap(GrenadeTexture);
+  FastFont.destroy;
   al_destroy_font(Font);
   al_destroy_sample(Music);
   al_destroy_timer(FpsTimer);
@@ -344,31 +354,28 @@ begin
   al_use_transform(Transform);
   if ShowingText then
   begin
-    LineHeight := al_get_font_line_height(Font);
+    LineHeight := al_get_font_line_height(Font) + 2;
+    FastFont.clear;
     Text := 'FPS: ' + IntToStr(Fps);
-    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 1, 0, Text);
-    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 0, 0, Text);
+    FastFont.add_ex(0, 0, Text);
     if UsingFrameTimer then
       Text := 'Frame timer: ' + IntToStr(FRAME_TIMER_RATE) + ' [F]'
     else
       Text := 'Frame timer: Off [F]';
-    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, LineHeight + 1, 0, Text);
-    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, LineHeight, 0, Text);
+    FastFont.add_ex(0, LineHeight, Text);
     Text := 'Showing text [T]';
-    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 2 * LineHeight + 1, 0, Text);
-    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 2 * LineHeight, 0, Text);
+    FastFont.add_ex(0, 2 * LineHeight, Text);
     if Zoomed then
       Text := 'Zoom: ' + IntToStr(ZOOM_AMOUNT) + ' [MB2]'
     else
       Text := 'Zoom: 1 [MB2]';
-    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 3 * LineHeight + 1, 0, Text);
-    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 3 * LineHeight, 0, Text);
+    FastFont.add_ex(0, 3 * LineHeight, Text);
     if MusicMuted then
       Text := 'Music: Off [M]'
     else
       Text := 'Music: On [M]';
-    al_draw_text(Font, al_map_rgb(0, 0, 0), 1, 4 * LineHeight + 1, 0, Text);
-    al_draw_text(Font, al_map_rgb(255, 255, 255), 0, 4 * LineHeight, 0, Text);
+    FastFont.add_ex(0, 4 * LineHeight, Text);
+    FastFont.draw;
   end;
 
   al_flip_display();

@@ -200,14 +200,20 @@ begin
 end;
 
 procedure TFastFont.set_ex(Color, Shadow: ALLEGRO_COLOR; LineSpacing: Integer);
-begin
+begin 
+  if not Loaded then
+    exit;
+
   ExColor := Color;
   ExShadow := Shadow;
   ExLineSpacing := LineSpacing;
 end;
 
 procedure TFastFont.add_ex(X, Y: Single; const Text: String);
-begin
+begin    
+  if not Loaded then
+    exit;
+
   if ExShadow.a > 0 then
     add(ExShadow, X + 1, Y + 1, Text);
   add(ExColor, X, Y, Text);
@@ -216,15 +222,22 @@ end;
 procedure TFastFont.add_ex(X, Y: Single; const Texts: array of String);
 var
   I: Integer;
-begin
+begin   
+  if not Loaded then
+    exit;
+
   for I := 0 to High(Texts) do
     add_ex(X, I * (LineHeight + ExLineSpacing) + Y, Texts[I]);
 end;
 
 procedure TFastFont.draw;
-begin
-  al_draw_indexed_prim(Addr(Vertices[0]), nil, GlyphTexture, Indices,
-    VertexOffset div 4 * 6, ALLEGRO_PRIM_TRIANGLE_LIST);
+begin     
+  if not Loaded then
+    exit;
+
+  if VertexOffset > 0 then
+    al_draw_indexed_prim(Addr(Vertices[0]), nil, GlyphTexture, Indices,
+      VertexOffset div 4 * 6, ALLEGRO_PRIM_TRIANGLE_LIST);
 end;
 
 end.

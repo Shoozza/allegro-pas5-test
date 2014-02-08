@@ -29,8 +29,8 @@ const
   RESERVED_SAMPLES = 1;
   MUSIC_GAIN = 0.5;
 
-  GRENADE_VERTEX_COUNT = GRENADE_COUNT*4;
-  GRENADE_INDEX_COUNT = GRENADE_COUNT*6;
+  GRENADE_VERTEX_COUNT = 4 * GRENADE_COUNT;
+  GRENADE_INDEX_COUNT = 6 * GRENADE_COUNT;
 
 type
   TGrenade = record
@@ -333,7 +333,7 @@ begin
   end;
   al_use_transform(Transform);
 
-  al_draw_prim(Addr(BackgroundVertices[0]), Nil, BackgroundTexture, 0, 4,
+  al_draw_prim(Addr(BackgroundVertices[0]), nil, BackgroundTexture, 0, 4,
     ALLEGRO_PRIM_TRIANGLE_STRIP);
 
   for I := 1 to High(Grenades) do
@@ -347,7 +347,7 @@ begin
     GrenadeVertices[I * 4 - 1].x := Grenades[I].X + GRENADE_RADIUS;
     GrenadeVertices[I * 4 - 1].y := Grenades[I].Y + GRENADE_RADIUS;
   end;
-  al_draw_indexed_prim(Addr(GrenadeVertices[0]), Nil, GrenadeTexture,
+  al_draw_indexed_prim(Addr(GrenadeVertices[0]), nil, GrenadeTexture,
     GrenadeIndices, Length(GrenadeIndices), ALLEGRO_PRIM_TRIANGLE_LIST);
 
   al_identity_transform(Transform);

@@ -48,7 +48,7 @@ type
     ExColor, ExShadow: ALLEGRO_COLOR;
     ExLineSpacing: Single;
   public
-    constructor create(Font: ALLEGRO_FONTptr);
+    constructor create(Font: ALLEGRO_FONTptr; TextureSize: Integer);
     destructor destroy; override;
     property is_loaded: Boolean read Loaded;
     procedure reserve(GlyphCount: Integer);
@@ -62,16 +62,13 @@ type
 
 implementation
 
-const
-  GLYPH_TEXTURE_SIZE = 256;
-
-constructor TFastFont.create(Font: ALLEGRO_FONTptr);
+constructor TFastFont.create(Font: ALLEGRO_FONTptr; TextureSize: Integer);
 var
   NextX, NextY, I: Integer;
 begin
   Loaded := false;
 
-  GlyphTexture := al_create_bitmap(GLYPH_TEXTURE_SIZE, GLYPH_TEXTURE_SIZE);
+  GlyphTexture := al_create_bitmap(TextureSize, TextureSize);
   if GlyphTexture = nil then
     exit;
 
@@ -86,7 +83,7 @@ begin
   for I := 33 to 126 do
   begin
     GlyphWidths[I] := al_get_text_width(Font, Chr(I));
-    if NextX + GlyphWidths[I] > GLYPH_TEXTURE_SIZE then
+    if NextX + GlyphWidths[I] > TextureSize then
     begin
       NextX := 0;
       NextY := NextY + LineHeight;

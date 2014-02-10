@@ -146,7 +146,7 @@ begin
     WriteLn('load font error');
     halt(1);
   end;
-  FontDrawer := TFastFont.create(Font);
+  FontDrawer := TFastFont.create(Font, 128);
   if FontDrawer = nil then
   begin
     WriteLn('create fast font error');
